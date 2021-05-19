@@ -67,11 +67,6 @@ public enum CalculationMethod {
   SINGAPORE,
 
   /**
-   * Wifaqul Ulama Calculation Parameters for HighLatitute Countries
-   */
-  WIFAQUL_ULAMA_HILAT,
-
-  /**
    * The default value for {@link CalculationParameters#method} when initializing a
    * {@link CalculationParameters} object. Sets a Fajr angle of 0 and an Isha angle of 0.
    */
