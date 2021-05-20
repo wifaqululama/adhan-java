@@ -48,14 +48,14 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
                 val sunset = LocalTime.parse(formatter.format(prayerTimesMap.get(Prayer.MAGHRIB)))
                 val todaySunset = LocalDateTime.of(convertToLocalDateViaInstant(date),sunset)
                 val tomorrowSunrise = LocalDateTime.of(convertToLocalDateViaInstant(nextDate),sunrise)
-                var mins = todaySunset.until(tomorrowSunrise,ChronoUnit.HOURS)
+                var mins = todaySunset.until(tomorrowSunrise,ChronoUnit.MINUTES)
                 //mins += 1440/60
-                println("nisful the number of hours in between is $mins")
+                println("nisful the number of mins in between is $mins")
                 // Divide in two
                 var nisfulMins = (mins/2).toInt()
                 nisfulMins = Math.abs(nisfulMins)
                 println("nisfulMins are $nisfulMins")
-                c.time = date
+                c.time = prayerTimesMap.get(Prayer.MAGHRIB)
                 c.add(Calendar.MINUTE,nisfulMins);
                 val nisfulFajr = c.time
                 prayerTimesMap.put(Prayer.FAJR,nisfulFajr)
