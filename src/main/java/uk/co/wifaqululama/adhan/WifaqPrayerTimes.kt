@@ -6,17 +6,20 @@ import com.batoulapps.adhan.Prayer
 import com.batoulapps.adhan.PrayerTimes
 import com.batoulapps.adhan.data.DateComponents
 import java.text.SimpleDateFormat
-import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 /**
  * Adapter for Adhan Prayer Times with Wifaqul Ulama Rules
  */
-class PrayerTimes(val coordinates: Coordinates,val preferences: CalculationPreferences) {
+class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: CalculationPreferences) {
     val formatter = SimpleDateFormat("HH:mm")
 
-    fun getPrayerTimes(date: Date): List<Date>{
+    fun getPrayerTimes(date: Date): HashMap<Prayer,Date>{
         val dateComponent = DateComponents.from(date)
         val prayerTimesList = ArrayList<Date>()
         val prayerTimesMap = HashMap<Prayer,Date>()
@@ -43,13 +46,19 @@ class PrayerTimes(val coordinates: Coordinates,val preferences: CalculationPrefe
                 val nextDayPrayerTimes = PrayerTimes(coordinates,DateComponents.from(nextDate),params)
                 val sunrise = LocalTime.parse(formatter.format(nextDayPrayerTimes.sunrise))
                 val sunset = LocalTime.parse(formatter.format(prayerTimesMap.get(Prayer.MAGHRIB)))
-                val mins = Duration.between(sunset,sunrise).toMinutes()
+                val todaySunset = LocalDateTime.of(convertToLocalDateViaInstant(date),sunset)
+                val tomorrowSunrise = LocalDateTime.of(convertToLocalDateViaInstant(nextDate),sunrise)
+                var mins = todaySunset.until(tomorrowSunrise,ChronoUnit.HOURS)
+                //mins += 1440/60
+                println("nisful the number of hours in between is $mins")
                 // Divide in two
-                val nisfulMins = (mins/2).toInt()
+                var nisfulMins = (mins/2).toInt()
+                nisfulMins = Math.abs(nisfulMins)
+                println("nisfulMins are $nisfulMins")
                 c.time = date
                 c.add(Calendar.MINUTE,nisfulMins);
                 val nisfulFajr = c.time
-
+                prayerTimesMap.put(Prayer.FAJR,nisfulFajr)
                 //TODO determine if the Nisful Time should be used over the set Fajr Time
             }
             HighLatFajr.AQRABUL_AYYAM ->{
@@ -75,6 +84,12 @@ class PrayerTimes(val coordinates: Coordinates,val preferences: CalculationPrefe
                 prayerTimesMap.put(Prayer.ISHA,times.isha)
             }
         }
-        return prayerTimesList
+        return prayerTimesMap
+    }
+
+    fun convertToLocalDateViaInstant(dateToConvert: Date): LocalDate? {
+        return dateToConvert.toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
     }
 }
