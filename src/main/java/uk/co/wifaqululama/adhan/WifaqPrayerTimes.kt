@@ -16,7 +16,7 @@ import java.util.*
 class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: CalculationPreferences) {
     val formatter = SimpleDateFormat("HH:mm")
 
-    fun getPrayerTimes(date: Date): HashMap<Prayer,Date>{
+    fun getPrayerTimes(date: LocalDate): HashMap<Prayer,Date>{
         val dateComponent = DateComponents.from(date)
         val prayerTimesList = ArrayList<Date>()
         val prayerTimesMap = HashMap<Prayer,Date>()
