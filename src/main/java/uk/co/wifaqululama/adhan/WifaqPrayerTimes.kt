@@ -2,6 +2,8 @@ package uk.co.wifaqululama.adhan
 
 import com.batoulapps.adhan.*
 import com.batoulapps.adhan.data.DateComponents
+import com.batoulapps.adhan.data.TimeComponents
+import com.batoulapps.adhan.internal.SolarTime
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -63,9 +65,15 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
             }
             HighLatIsha.AL_ABYADH ->{
                 //TODO figure out how al_abyadh is calculated
+                params.ishaAngle = 18.0
+                params.highLatitudeRule = HighLatitudeRule.SEVENTH_OF_THE_NIGHT
+                val times = PrayerTimes(coordinates,dateComponent,params)
+                prayerTimesMap.put(Prayer.ISHA,times.isha)
+
             }
             HighLatIsha.AL_AHMAR ->{
                 params.ishaAngle = 15.0
+                params.highLatitudeRule = HighLatitudeRule.SEVENTH_OF_THE_NIGHT
                 val times = PrayerTimes(coordinates,dateComponent,params)
                 prayerTimesMap.put(Prayer.ISHA,times.isha)
             }
