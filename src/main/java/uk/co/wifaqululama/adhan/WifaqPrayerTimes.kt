@@ -16,6 +16,14 @@ import java.util.*
  * Adapter for Adhan Prayer Times with Wifaqul Ulama Rules
  */
 class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: CalculationPreferences) {
+    var isUK = false
+
+    /**
+     * Secondary Constructor that can be used to flag if UK Aqrabul Ayyam Calculations can be used
+     */
+    constructor(coordinates: Coordinates, preferences: CalculationPreferences, isUK: Boolean) : this(coordinates,preferences) {
+        this.isUK = true
+    }
     val formatter = SimpleDateFormat("HH:mm")
 
     fun getPrayerTimes(date: LocalDate): HashMap<Prayer,Date>{
@@ -48,9 +56,16 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
             HighLatFajr.AQRABUL_AYYAM -> {
                 //TODO determine last true 18deg time
                 val aqrabulAyyam = AqrabulAyyam(coordinates)
-                val newDate = aqrabulAyyam.getLastTrueSunset(dateComponent)
-                val newTimes = PrayerTimes(coordinates, newDate, params)
-                prayerTimesMap.put(Prayer.FAJR,newTimes.fajr)
+                if(isUK){
+                    val fajrAQ = aqrabulAyyam.getBritishAqrabulAyyamTime(dateComponent)
+                    val mInstant = fajrAQ.atDate(date).atZone(ZoneId.systemDefault()).toInstant()
+                    val dateFajr = Date.from(mInstant)
+                    prayerTimesMap.put(Prayer.FAJR,dateFajr)
+                } else{
+                    val newDate = aqrabulAyyam.getLastTrueSunset(dateComponent)
+                    val newTimes = PrayerTimes(coordinates, newDate, params)
+                    prayerTimesMap.put(Prayer.FAJR,newTimes.fajr)
+                }
             }
         }
         // Get High-Lat Isha Time and compare
