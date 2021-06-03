@@ -60,7 +60,8 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
                     val fajrAQ = aqrabulAyyam.getBritishAqrabulAyyamTime(dateComponent)
                     val mInstant = fajrAQ.atDate(date).atZone(ZoneId.systemDefault()).toInstant()
                     val dateFajr = Date.from(mInstant)
-                    prayerTimesMap.put(Prayer.FAJR,dateFajr)
+                    if(dateFajr.time > prayerTimesMap.get(Prayer.FAJR)!!.time )
+                        prayerTimesMap.put(Prayer.FAJR,dateFajr)
                 } else{
                     val newDate = aqrabulAyyam.getLastTrueSunset(dateComponent)
                     val newTimes = PrayerTimes(coordinates, newDate, params)
