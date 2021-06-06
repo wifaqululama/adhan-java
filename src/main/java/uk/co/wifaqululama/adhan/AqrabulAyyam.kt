@@ -4,6 +4,7 @@ import com.batoulapps.adhan.Coordinates
 import com.batoulapps.adhan.data.DateComponents
 import com.batoulapps.adhan.data.TimeComponents
 import com.batoulapps.adhan.internal.SolarTime
+import java.lang.Math.ceil
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -32,8 +33,9 @@ class AqrabulAyyam(val coordinates: Coordinates) {
      */
     fun getBritishAqrabulAyyamTime(date: DateComponents): LocalTime {
         var time  = LocalTime.of(0,0,0);
-        var fajrAQ: Double = 1.78
+        var fajrAQ = 1.78001
         val latitude = coordinates.latitude
+        val longitude = coordinates.longitude
         if(latitude > 48.89){
             fajrAQ = when{
                 latitude > 49.89 && latitude <= 50-> 1.68
@@ -42,12 +44,13 @@ class AqrabulAyyam(val coordinates: Coordinates) {
                 latitude > 50.5 && latitude <= 50.75 -> 1.45
                 latitude > 50.75 && latitude <= 51 -> 1.38
                 latitude > 51 && latitude <= 51.25-> 1.48
-                latitude > 51.25 && latitude <= 51.5 -> 1.47
+                latitude > 51.25 && latitude <= 51.5 -> 1.383 // Tooting
                 latitude > 51.5 && latitude <= 51.75 -> 1.383 //Ilford
                 latitude > 51.75 && latitude <= 52 -> 1.383 //Walthamstow
                 latitude > 52 && latitude <= 52.25 -> 1.50
                 latitude > 52.25 && latitude <= 52.5 -> 1.483 //Birmingham
-                latitude > 52.5 && latitude <= 52.75 -> 1.5 //Leicester 52.6369
+                latitude > 52.5 && latitude <= 52.75  && longitude > -1.6343-> 1.5 // Leicester
+                latitude > 52.5 && latitude <= 52.75  && longitude < -1.6343-> 1.566 // Wolverhampton
                 latitude > 52.75 && latitude <= 53 -> 1.50
                 latitude > 53 && latitude <= 53.25 -> 1.47
                 latitude > 53.25 && latitude <= 53.5 -> 1.633 //Manchester
@@ -67,8 +70,8 @@ class AqrabulAyyam(val coordinates: Coordinates) {
                 }
             }
         }
-        println("Latitude is $latitude and fajrAQ is $fajrAQ")
-        val t = (60 * fajrAQ)
+        val t = ceil((60 * fajrAQ))
+        println("Latitude is $latitude, Longitude is $longitude and fajrAQ is $fajrAQ which is $t seconds")
         return time.plusMinutes(t.toLong())
     }
 }
