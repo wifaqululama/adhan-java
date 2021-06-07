@@ -55,18 +55,23 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
             }
             HighLatFajr.AQRABUL_AYYAM -> {
                 //TODO determine last true 18deg time
-                val aqrabulAyyam = AqrabulAyyam(coordinates)
-                if(isUK){
-                    val fajrAQ = aqrabulAyyam.getBritishAqrabulAyyamTime(dateComponent)
-                    val mInstant = fajrAQ.atDate(date).atZone(ZoneId.systemDefault()).toInstant()
-                    val dateFajr = Date.from(mInstant)
-                    if(dateFajr.time > prayerTimesMap.get(Prayer.FAJR)!!.time )
-                        prayerTimesMap.put(Prayer.FAJR,dateFajr)
-                } else{
-                    val newDate = aqrabulAyyam.getLastTrueSunset(dateComponent)
-                    val newTimes = PrayerTimes(coordinates, newDate, params)
-                    prayerTimesMap.put(Prayer.FAJR,newTimes.fajr)
+                val aqrabulAyyam = AqrabulAyyam(coordinates,params)
+//                if(isUK){
+//                    val fajrAQ = aqrabulAyyam.getBritishAqrabulAyyamTime(dateComponent)
+//                    val mInstant = fajrAQ.atDate(date).atZone(ZoneId.systemDefault()).toInstant()
+//                    val dateFajr = Date.from(mInstant)
+//                    if(dateFajr.time > prayerTimesMap.get(Prayer.FAJR)!!.time )
+//                        prayerTimesMap.put(Prayer.FAJR,dateFajr)
+//                } else{
+//                    val newDate = aqrabulAyyam.getLastTrueSunset(dateComponent)
+//                    val newTimes = PrayerTimes(coordinates, newDate, params)
+//                    prayerTimesMap.put(Prayer.FAJR,newTimes.fajr)
+//                }
+                if(!aqrabulAyyam.isSunsetAcheived(dateComponent)){
+                    val avgTime = aqrabulAyyam.getAveragedTime(dateComponent)
+                    prayerTimesMap.put(Prayer.FAJR, avgTime)
                 }
+
             }
         }
         // Get High-Lat Isha Time and compare

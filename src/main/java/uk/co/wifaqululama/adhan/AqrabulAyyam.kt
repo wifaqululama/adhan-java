@@ -7,28 +7,72 @@ import com.batoulapps.adhan.data.DateComponents
 import com.batoulapps.adhan.data.TimeComponents
 import com.batoulapps.adhan.internal.SolarTime
 import java.lang.Math.ceil
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.*
 import java.util.*
 
 /**
  * Helper Class to calculate Aqrabul Ayyam
  */
-class AqrabulAyyam(val coordinates: Coordinates) {
+class AqrabulAyyam(val coordinates: Coordinates, val parameters: CalculationParameters) {
 
     /**
      * Recursively try to get Aqrabul Ayyam Date.
      */
     fun getLastTrueSunset(date: DateComponents): DateComponents {
-        val solarTime = SolarTime(date, coordinates)
-        val timeComponent = TimeComponents.fromDouble(solarTime.hourAngle(-18.0, false))
-        if (timeComponent == null) {
+        if(!isSunsetAcheived(date)){
             var setDate = LocalDate.of(date.year, date.month, date.day)
             setDate = setDate.minusDays(1)
             return getLastTrueSunset(DateComponents(setDate.year, setDate.month.value, setDate.dayOfMonth))
         } else {
             return date
         }
+    }
+
+     fun isSunsetAcheived(date: DateComponents): Boolean{
+        val solarTime = SolarTime(date,coordinates)
+        val timeComponent = TimeComponents.fromDouble(solarTime.hourAngle(-18.0, false))
+         return timeComponent != null
+    }
+
+    fun getAveragedTime(date: DateComponents): Date {
+        val lastFajrDate = getLastTrueSunset(date)
+        val lastFajrLocalDate = LocalDate.of(lastFajrDate.year,lastFajrDate.month,lastFajrDate.day)
+        val yearlyTimesList = getAverageFromYear(lastFajrLocalDate) + getAverageFromYear(lastFajrLocalDate.minusYears(1)) + getAverageFromYear(lastFajrLocalDate.minusYears(2)) + getAverageFromYear(lastFajrLocalDate.minusYears(3))
+        var averageFajr = averageTime(yearlyTimesList)
+        println(averageFajr)
+        val instant: Instant =
+            averageFajr!!.atDate(lastFajrLocalDate).atZone(ZoneId.systemDefault()).toInstant()
+        val time = Date.from(instant)
+        return time
+    }
+
+    private fun getAverageFromYear(date:LocalDate): List<LocalTime> {
+        // check if the current date is okay to use as a starting point
+        var workingDate = date
+        if(!isSunsetAcheived(DateComponents.from(date))){
+            var testDate = date
+            while(!isSunsetAcheived(DateComponents.from(testDate))){
+                testDate = testDate.minusDays(1)
+            }
+            workingDate = testDate
+       }
+        return listOf(fajrOnDate(workingDate),fajrOnDate((workingDate.minusDays(1))),fajrOnDate(workingDate.minusDays(2)))
+    }
+
+    private fun fajrOnDate(localDate: LocalDate): LocalTime {
+        var fajrOnDate = PrayerTimes(coordinates, DateComponents.from(localDate), parameters).fajr
+        return LocalDateTime.ofInstant(
+            fajrOnDate.toInstant(),
+            ZoneId.systemDefault()
+        ).toLocalTime()
+    }
+
+    private fun averageTime(list: List<LocalTime>): LocalTime {
+        var nanoSum: Long = 0
+        for (time in list) {
+            nanoSum += time.toNanoOfDay()
+        }
+        return LocalTime.ofNanoOfDay(nanoSum / (list.size))
     }
 
     /**
@@ -74,7 +118,6 @@ class AqrabulAyyam(val coordinates: Coordinates) {
             }
         }
         val t = ceil((60 * fajrAQ))
-        println("Latitude is $latitude, Longitude is $longitude and fajrAQ is $fajrAQ which is $t mins")
         return time.plusMinutes(t.toLong())
     }
 
