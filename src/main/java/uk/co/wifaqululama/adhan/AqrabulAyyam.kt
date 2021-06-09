@@ -36,7 +36,7 @@ class AqrabulAyyam(val coordinates: Coordinates, val parameters: CalculationPara
 
     fun getAveragedTime(date: DateComponents): Date {
         val lastFajrDate = getLastTrueSunset(date)
-        val lastFajrLocalDate = LocalDate.of(lastFajrDate.year,lastFajrDate.month,lastFajrDate.day)
+        val lastFajrLocalDate = LocalDate.of(date.year,date.month,date.day)
         val yearlyTimesList = getAverageFromYear(lastFajrLocalDate) + getAverageFromYear(lastFajrLocalDate.minusYears(1)) + getAverageFromYear(lastFajrLocalDate.minusYears(2)) + getAverageFromYear(lastFajrLocalDate.minusYears(3))
         var averageFajr = averageTime(yearlyTimesList)
         println(averageFajr)
@@ -61,10 +61,12 @@ class AqrabulAyyam(val coordinates: Coordinates, val parameters: CalculationPara
 
     private fun fajrOnDate(localDate: LocalDate): LocalTime {
         var fajrOnDate = PrayerTimes(coordinates, DateComponents.from(localDate), parameters).fajr
-        return LocalDateTime.ofInstant(
+        val time =  LocalDateTime.ofInstant(
             fajrOnDate.toInstant(),
             ZoneId.systemDefault()
         ).toLocalTime()
+        println("Date is $localDate and the time is $time")
+        return time
     }
 
     private fun averageTime(list: List<LocalTime>): LocalTime {
