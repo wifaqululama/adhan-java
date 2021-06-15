@@ -87,17 +87,34 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
             HighLatIsha.AL_ABYADH ->{
                 //TODO figure out how al_abyadh is calculated
                 params.ishaAngle = 18.0
+                if(!ishaAnglePossible(dateComponent,-18.0)){
+                    params.highLatitudeRule = HighLatitudeRule.SEVENTH_OF_THE_NIGHT
+                }
                 val times = PrayerTimes(coordinates,dateComponent,params)
                 prayerTimesMap.put(Prayer.ISHA,times.isha)
+
 
             }
             HighLatIsha.AL_AHMAR ->{
                 params.ishaAngle = 15.0
+                if(!ishaAnglePossible(dateComponent,-15.0)){
+                    params.highLatitudeRule = HighLatitudeRule.SEVENTH_OF_THE_NIGHT
+                }
                 val times = PrayerTimes(coordinates,dateComponent,params)
                 prayerTimesMap.put(Prayer.ISHA,times.isha)
             }
         }
         return prayerTimesMap
+    }
+
+    private fun ishaAnglePossible(date: DateComponents,angle:Double): Boolean {
+        val solarTime = SolarTime(date,coordinates)
+        val timeComponent = TimeComponents.fromDouble(solarTime.hourAngle(angle, false))
+        return timeComponent !=null
+    }
+
+    private fun getHarajTime(date: DateComponents,calculationParameters: CalculationParameters){
+
     }
 
     fun convertToLocalDateViaInstant(dateToConvert: Date): LocalDate? {
