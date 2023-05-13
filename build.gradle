@@ -13,15 +13,6 @@ test {
    finalizedBy jacocoTestReport
 }
 
-jacocoTestReport {
-   dependsOn test
-
-   reports {
-      xml.enabled true
-      xml.destination file("${buildDir}/reports/jacoco/report.xml")
-   }
-}
-
 dependencies {
    testImplementation 'junit:junit:4.13.1'
    testImplementation 'com.squareup.okio:okio:2.10.0'
@@ -41,4 +32,9 @@ compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
