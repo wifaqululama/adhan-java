@@ -65,7 +65,6 @@ class AqrabulAyyam(val coordinates: Coordinates, val parameters: CalculationPara
             fajrOnDate.toInstant(),
             ZoneId.systemDefault()
         ).toLocalTime()
-        println("Date is $localDate and the time is $time")
         return time
     }
 
