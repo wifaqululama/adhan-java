@@ -4,24 +4,13 @@ import com.batoulapps.adhan.*
 import com.batoulapps.adhan.data.DateComponents
 import com.batoulapps.adhan.data.TimeComponents
 import com.batoulapps.adhan.internal.SolarTime
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.ZoneId
 import java.util.*
 
 /**
  * Adapter for Adhan Prayer Times with Wifaqul Ulama Rules
  */
 class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: CalculationPreferences) {
-    var isUK = false
-
-    /**
-     * Secondary Constructor that can be used to flag if UK Aqrabul Ayyam Calculations can be used
-     */
-    constructor(coordinates: Coordinates, preferences: CalculationPreferences, isUK: Boolean) : this(coordinates,preferences) {
-        this.isUK = true
-    }
-    val formatter = SimpleDateFormat("HH:mm")
 
     fun getPrayerTimes(date: LocalDate): HashMap<Prayer,Date>{
         val dateComponent = DateComponents.from(date)
@@ -32,12 +21,12 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
         params.madhab = preferences.madhab
         val defaultTimes = PrayerTimes(coordinates,dateComponent,params)
         // Add initial (non-HighLat times)
-        prayerTimesMap.put(Prayer.FAJR,defaultTimes.fajr)
-        prayerTimesMap.put(Prayer.SUNRISE,defaultTimes.sunrise)
-        prayerTimesMap.put(Prayer.DHUHR,defaultTimes.dhuhr)
-        prayerTimesMap.put(Prayer.ASR,defaultTimes.asr)
-        prayerTimesMap.put(Prayer.MAGHRIB,defaultTimes.maghrib)
-        prayerTimesMap.put(Prayer.ISHA,defaultTimes.isha)
+        prayerTimesMap[Prayer.FAJR] = defaultTimes.fajr
+        prayerTimesMap[Prayer.SUNRISE] = defaultTimes.sunrise
+        prayerTimesMap[Prayer.DHUHR] = defaultTimes.dhuhr
+        prayerTimesMap[Prayer.ASR] = defaultTimes.asr
+        prayerTimesMap[Prayer.MAGHRIB] = defaultTimes.maghrib
+        prayerTimesMap[Prayer.ISHA] = defaultTimes.isha
 
         when(preferences.highLatFajr){
             HighLatFajr.NISFUL_LAYL ->{
@@ -52,17 +41,6 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
             HighLatFajr.AQRABUL_AYYAM -> {
                 //TODO determine last true 18deg time
                 val aqrabulAyyam = AqrabulAyyam(coordinates,params)
-//                if(isUK){
-//                    val fajrAQ = aqrabulAyyam.getBritishAqrabulAyyamTime(dateComponent)
-//                    val mInstant = fajrAQ.atDate(date).atZone(ZoneId.systemDefault()).toInstant()
-//                    val dateFajr = Date.from(mInstant)
-//                    if(dateFajr.time > prayerTimesMap.get(Prayer.FAJR)!!.time )
-//                        prayerTimesMap.put(Prayer.FAJR,dateFajr)
-//                } else{
-//                    val newDate = aqrabulAyyam.getLastTrueSunset(dateComponent)
-//                    val newTimes = PrayerTimes(coordinates, newDate, params)
-//                    prayerTimesMap.put(Prayer.FAJR,newTimes.fajr)
-//                }
                 if(!aqrabulAyyam.isSunsetAcheived(dateComponent)){
                     val aqrabulAyyamTime = aqrabulAyyam.getLastFajrTime(dateComponent)
                     prayerTimesMap[Prayer.FAJR] = aqrabulAyyamTime
@@ -81,15 +59,12 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
                 }
             }
             HighLatIsha.AL_ABYADH ->{
-                //TODO figure out how al_abyadh is calculated
                 params.ishaAngle = 18.0
                 if(!ishaAnglePossible(dateComponent,-18.0)){
                     params.highLatitudeRule = HighLatitudeRule.SEVENTH_OF_THE_NIGHT
                 }
                 val times = PrayerTimes(coordinates,dateComponent,params)
                 prayerTimesMap.put(Prayer.ISHA,times.isha)
-
-
             }
             HighLatIsha.AL_AHMAR ->{
                 params.ishaAngle = 15.0
@@ -107,15 +82,5 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
         val solarTime = SolarTime(date,coordinates)
         val timeComponent = TimeComponents.fromDouble(solarTime.hourAngle(angle, false))
         return timeComponent !=null
-    }
-
-    private fun getHarajTime(date: DateComponents,calculationParameters: CalculationParameters){
-
-    }
-
-    fun convertToLocalDateViaInstant(dateToConvert: Date): LocalDate? {
-        return dateToConvert.toInstant()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
     }
 }
