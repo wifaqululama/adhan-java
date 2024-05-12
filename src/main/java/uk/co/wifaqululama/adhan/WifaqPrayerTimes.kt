@@ -6,10 +6,7 @@ import com.batoulapps.adhan.data.TimeComponents
 import com.batoulapps.adhan.internal.SolarTime
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 /**
@@ -28,7 +25,6 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
 
     fun getPrayerTimes(date: LocalDate): HashMap<Prayer,Date>{
         val dateComponent = DateComponents.from(date)
-        val prayerTimesList = ArrayList<Date>()
         val prayerTimesMap = HashMap<Prayer,Date>()
         // Get and Calculate Prayer Times here...
         // Initial Calculation
@@ -68,8 +64,8 @@ class WifaqPrayerTimes(val coordinates: Coordinates,val preferences: Calculation
 //                    prayerTimesMap.put(Prayer.FAJR,newTimes.fajr)
 //                }
                 if(!aqrabulAyyam.isSunsetAcheived(dateComponent)){
-                    val avgTime = aqrabulAyyam.getAveragedTime(dateComponent)
-                    prayerTimesMap.put(Prayer.FAJR, avgTime)
+                    val aqrabulAyyamTime = aqrabulAyyam.getLastFajrTime(dateComponent)
+                    prayerTimesMap[Prayer.FAJR] = aqrabulAyyamTime
                 }
 
             }

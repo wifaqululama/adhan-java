@@ -34,6 +34,13 @@ class AqrabulAyyam(val coordinates: Coordinates, val parameters: CalculationPara
          return timeComponent != null
     }
 
+    fun getLastFajrTime(date: DateComponents): Date {
+        val lastFajrDate = getLastTrueSunset(date)
+        val lastFajrLd = LocalDate.of(date.year,date.month,date.day)
+        val fajr = fajrOnDate(lastFajrLd)
+        return Date.from(fajr.atDate(lastFajrLd).atZone(ZoneId.systemDefault()).toInstant())
+    }
+
     fun getAveragedTime(date: DateComponents): Date {
         val lastFajrDate = getLastTrueSunset(date)
         val lastFajrLocalDate = LocalDate.of(date.year,date.month,date.day)
