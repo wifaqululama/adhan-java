@@ -36,11 +36,12 @@ class AqrabulAyyam(val coordinates: Coordinates, val parameters: CalculationPara
 
     fun getLastFajrTime(date: DateComponents): Date {
         val lastFajrDate = getLastTrueSunset(date)
-        val lastFajrLd = LocalDate.of(date.year,date.month,date.day)
+        val lastFajrLd = LocalDate.of(lastFajrDate.year,lastFajrDate.month,lastFajrDate.day)
         val fajr = fajrOnDate(lastFajrLd)
         return Date.from(fajr.atDate(lastFajrLd).atZone(ZoneId.systemDefault()).toInstant())
     }
 
+    @Deprecated("Not an accurate representation of AQ")
     fun getAveragedTime(date: DateComponents): Date {
         val lastFajrDate = getLastTrueSunset(date)
         val lastFajrLocalDate = LocalDate.of(date.year,date.month,date.day)
